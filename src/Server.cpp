@@ -54,24 +54,23 @@ void Server::initialize(unsigned int board_size,
         throw ServerException("Empty board files!!!");
     }
 
-
     ifstream inf1;
     string f1line;
-
     inf1.open("player_1.setup_board.txt");
 
     while (getline(inf1, f1line)) {
-        //        inf1 >> f1line;
         if (f1line.length() != board_size) {
             throw ServerException("Wrong Board Size!!!");
-        } else {
+        }
+        else {
             this->board_size = board_size;
         }
     }
 
     ifstream inf2;
     string f2line;
-    inf2.open("player_1.setup_board.txt");
+    inf2.open("player_2.setup_board.txt");
+
     while (getline(inf2, f2line)) {
         //        inf1 >> f1line;
         if (f2line.length() != board_size) {
@@ -81,6 +80,7 @@ void Server::initialize(unsigned int board_size,
             this->board_size = board_size;
         }
     }
+
 }
 
 /**
