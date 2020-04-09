@@ -75,11 +75,19 @@ void Server::initialize(unsigned int board_size,
         //        inf1 >> f1line;
         if (f2line.length() != board_size) {
             throw ServerException("Wrong Board Size!!!");
-            }
+        }
         else {
             this->board_size = board_size;
         }
     }
+
+}
+
+Server::~Server() {
+
+}
+
+BitArray2D *Server::scan_setup_board(string setup_board_name) {
 
 }
 
@@ -134,7 +142,7 @@ int Server::evaluate_shot(unsigned int player, unsigned int x, unsigned int y) {
 //    cout<< boa[x][y];
 //    cout<< endl;
 
-    }
+}
 
 /**
  * Processes a shot issued by player
@@ -144,7 +152,7 @@ int Server::evaluate_shot(unsigned int player, unsigned int x, unsigned int y) {
  * @param player - player number
  * @return returns SHOT_PROCESSED, or NO_SHOT_FILE if nothing to process
  */
-    int Server::process_shot(unsigned int player) {
+int Server::process_shot(unsigned int player) {
 
     if (player < 1 || player > 2) {
         throw ServerException("Wrong player number!!");
