@@ -50,13 +50,15 @@ void Server::initialize(unsigned int board_size,
                         string p1_setup_board,
                         string p2_setup_board){
 
-    if (p1_setup_board== "" || p2_setup_board== "") {
-        throw ServerException("Empty board files!!!");
+    if(p1_setup_board != "player_1.setup_board.txt" || p2_setup_board != "player_2.setup_board.txt") {
+        throw ("Bad file names!!");
+    }
+    else {
     }
 
     ifstream inf1;
     string f1line;
-    inf1.open("player_1.setup_board.txt");
+    inf1.open(p1_setup_board);
 
     while (getline(inf1, f1line)) {
         if (f1line.length() != board_size) {
@@ -69,7 +71,7 @@ void Server::initialize(unsigned int board_size,
 
     ifstream inf2;
     string f2line;
-    inf2.open("player_2.setup_board.txt");
+    inf2.open(p2_setup_board);
 
     while (getline(inf2, f2line)) {
         //        inf1 >> f1line;
@@ -81,6 +83,17 @@ void Server::initialize(unsigned int board_size,
         }
     }
 
+    //create boards by calling scan_setup_board with both p1 and p2 strings
+    this->p1_setup_board = scan_setup_board(p1_setup_board);
+    this->p2_setup_board = scan_setup_board(p2_setup_board);
+
+
+    //clear ifstream file states
+    inf1.clear();
+    inf1.seekg(0, ios::beg);
+    inf2.clear();
+    inf2.seekg(0, ios::beg);
+
 }
 
 Server::~Server() {
@@ -88,6 +101,29 @@ Server::~Server() {
 }
 
 BitArray2D *Server::scan_setup_board(string setup_board_name) {
+
+    BitArray2D *board = new BitArray2D(board_size, board_size);
+
+    ifstream in_board;
+    in_board.open(setup_board_name);
+
+    string line;
+
+    int r = 0;
+    int c = 0;
+
+    //set all bits that aren't the character "_"
+    while(getline(in_board, line)) {
+        for (char i: line) {
+            if (i!= '_') {
+                board->set(r, c);
+            }
+            c++;
+        }
+        c = 0;
+        r++;
+    }
+    return board;
 
 }
 
@@ -103,44 +139,28 @@ BitArray2D *Server::scan_setup_board(string setup_board_name) {
 */
 int Server::evaluate_shot(unsigned int player, unsigned int x, unsigned int y) {
 
+    bool shot;
+
     if (player < 1 || player > 2) {
         throw ServerException("Wrong player number!!");
     }
     if (x < 0 || x > board_size - 1 || y < 0 || y > board_size - 1) {
         return OUT_OF_BOUNDS;
     }
-
-    ifstream inf;
-    if (player == 1) {
-        inf.open("player_2.setup_board.txt");
-    }
-    if (player ==2) {
-        inf.open("player_1.setup_board.txt");
-    }
-    vector< vector< char>> boa(board_size, vector<char>(board_size));
-
-    while(!inf.eof()) {
-        for (int b=0; b<board_size; b++) {
-            for (int a=0; a<board_size; a++) {
-                inf >> boa[b][a];
-            }
+    else {
+        //get the value T/F at the given coordinate
+        if (player == 1) {
+            shot = this->p2_setup_board->get(y, x);
+        } else {
+            shot = this->p1_setup_board->get(x, y);
         }
-        if (boa[x][y] == '_') {
-            return MISS;
-        }
-        else {
+
+        if (shot == 1) {
             return HIT;
         }
+        else return MISS;
     }
-//  check layout of vector "boa"
-//    for (int i = 0; i<board_size; i++) {
-//        for (int j = 0; j<board_size; j++) {
-//            cout << boa[i][j] << ' ';
-//        }
-//        cout << endl;
-//    }
-//    cout<< boa[x][y];
-//    cout<< endl;
+
 
 }
 
@@ -175,7 +195,7 @@ int Server::process_shot(unsigned int player) {
 
         remove(first_board.c_str());
 
-        int result = evaluate_shot(player, y, x);
+        int result = evaluate_shot(player, x, y);
 //            cout << result;
 //            cout << endl;
 
